@@ -55,7 +55,7 @@ if ($result !== false) {
     throw new NotFoundHttpException(Yii::t('yii', 'Page not found.'));
 }
 ```
-resolve()使用gettUrlManager()->parseRequest($this)获取全部参数,将第一个参数作为路由，正则匹配所有参数并放入[$route, $params](路由，参数数组)数组中。
+resolve()使用gettUrlManager()->parseRequest($this)获取全部参数,将第一个参数作为路由，正则匹配所有参数并放入[$route, $params] (路由，参数数组)数组中。
 接下来handleRequest($request)调用runAction()来执行这个数组并检测返回值是不是Response对象，如果是就将结果返回给用户，否则就使用getResponse()获取response，将它的data作为结果返回给用户。
 runAction()方法位于yii\base\Application的父类yii\base\Module中，它需要接受2个参数，第一个是路由，第二个是有关此route的参数数组。
 ```
@@ -113,6 +113,95 @@ if (method_exists($this, 'set' . $name)) {
 
 ### yii2如何管理Url
 
-Yii 2 将Web应用中对于Url的常用要求抽象到了urlManager中，作为web应用的核心组件。
+Yii 2.0将Web应用中对于Url的常用要求抽象到了urlManager中，作为web应用的核心组件。urlManager类直接继承自yii\base\Component：
+```
+parent::init();
+if (!$this->enablePrettyUrl || empty($this->rules)) {
+    return;
+}
+if (is_string($this->cache)) {
+    $this->cache = Yii::$app->get($this->cache, false);
+}
+if ($this->cache instanceof Cache) {
+    $cacheKey = __CLASS__;
+    $hash = md5(json_encode($this->rules));
+    if (($data = $this->cache->get($cacheKey)) !== false && isset($data[1]) && $data[1] === $hash) {
+        $this->rules = $data[0];
+    } else {
+        $this->rules = $this->buildRules($this->rules);
+        $this->cache->set($cacheKey, [$this->rules, $hash]);
+    }
+} else {
+    $this->rules = $this->buildRules($this->rules);
+}
+```
+首先是父类的实例化，很遗憾，我没有在Component和Object类里找到init()方法(只有一个抽象的)。$enablePrettyUrl表明是否使用Url美化，如果不开启使用原有格式，那么路由规则是无效的。初始化前， $this->cache 是缓存组件的ID，是个字符串，需要获取其实例。如果获取不到实例，说明应用不提供缓存功能，那么就将它设为false。如果引用到了缓存，那么就将路由规则缓存起来。以当前的类名作为缓存的key，将路由规则转换为hash值(令其不能被修改)。$data[0]用于储存路由规则，$data[1]存储hash值。如果已经有缓存，就使用$data中的值；如果还没有缓存，那么就使用buildRules()创建路由规则并缓存。如果不使用缓存，那么就直接使用buildRules()创建。
+urlManager类里的许多方法都使用到buildRules()方法
+```
+$compiledRules = [];
+$verbs = 'GET|HEAD|POST|PUT|PATCH|DELETE|OPTIONS';
+foreach ($rules as $key => $rule) {
+    if (is_string($rule)) {
+        $rule = ['route' => $rule];
+        if (preg_match("/^((?:($verbs),)*($verbs))\\s+(.*)$/", $key, $matches)) {
+            $rule['verb'] = explode(',', $matches[1]);
+            if (!in_array('GET', $rule['verb'])) {
+                $rule['mode'] = UrlRule::PARSING_ONLY;
+            }
+            $key = $matches[4];
+        }
+        $rule['pattern'] = $key;
+    }
+    if (is_array($rule)) {
+        $rule = Yii::createObject(array_merge($this->ruleConfig, $rule));
+    }
+    if (!$rule instanceof UrlRuleInterface) {
+        throw new InvalidConfigException('URL rule class must implement UrlRuleInterface.');
+    }
+    $compiledRules[] = $rule;
+}
+return $compiledRules;
+```
+createUr():
+```
+$params = (array) $params;
+$anchor = isset($params['#']) ? '#' . $params['#'] : '';
+unset($params['#'], $params[$this->routeParam]);
+
+$route = trim($params[0], '/');
+unset($params[0]);
+
+$baseUrl = $this->showScriptName || !$this->enablePrettyUrl ? $this->getScriptUrl() : $this->getBaseUrl();
+
+if ($this->enablePrettyUrl) {
+    /* @var $rule UrlRule */
+    foreach ($this->rules as $rule) {
+        if (($url = $rule->createUrl($this, $route, $params)) !== false) {
+            if (strpos($url, '://') !== false) {
+                if ($baseUrl !== '' && ($pos = strpos($url, '/', 8)) !== false) {
+                    return substr($url, 0, $pos) . $baseUrl . substr($url, $pos);
+                } else {
+                    return $url . $baseUrl . $anchor;
+                }
+            } else {
+                return "$baseUrl/{$url}{$anchor}";
+            }
+        }
+    }
+    if ($this->suffix !== null) {
+        $route .= $this->suffix;
+    }
+    if (!empty($params) && ($query = http_build_query($params)) !== '') {
+        $route .= '?' . $query;
+    }
+    return "$baseUrl/{$route}{$anchor}";
+} else {
+    $url = "$baseUrl?{$this->routeParam}=" . urlencode($route);
+    if (!empty($params) && ($query = http_build_query($params)) !== '') {
+        $url .= '&' . $query;
+    }
+    return $url . $anchor;
+}
+```
 
   
