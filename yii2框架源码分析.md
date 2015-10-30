@@ -113,4 +113,6 @@ if (method_exists($this, 'set' . $name)) {
 
 ### yii2如何管理Url
 
+Yii 2 将Web应用中对于Url的常用要求抽象到了urlManager中，作为web应用的核心组件。
+
   
