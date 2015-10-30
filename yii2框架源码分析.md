@@ -55,7 +55,7 @@ if ($result !== false) {
     throw new NotFoundHttpException(Yii::t('yii', 'Page not found.'));
 }
 ```
-resolve()使用gettUrlManager()->parseRequest($this)获取全部参数,将第一个参数作为路由，正则匹配所有参数并放入[$route, $params] (路由，参数数组)数组中。
+resolve()使用getUrlManager()->parseRequest($this)获取全部参数,将第一个参数作为路由，正则匹配所有参数并放入[$route, $params] (路由，参数数组)数组中。
 接下来handleRequest($request)调用runAction()来执行这个数组并检测返回值是不是Response对象，如果是就将结果返回给用户，否则就使用getResponse()获取response，将它的data作为结果返回给用户。
 runAction()方法位于yii\base\Application的父类yii\base\Module中，它需要接受2个参数，第一个是路由，第二个是有关此route的参数数组。
 ```
@@ -162,7 +162,7 @@ foreach ($rules as $key => $rule) {
 }
 return $compiledRules;
 ```
-createUr():
+createUrl():
 ```
 $params = (array) $params;
 $anchor = isset($params['#']) ? '#' . $params['#'] : '';
@@ -203,5 +203,46 @@ if ($this->enablePrettyUrl) {
     return $url . $anchor;
 }
 ```
+parseRequest($request):
+```
+if ($this->enablePrettyUrl) {
+    $pathInfo = $request->getPathInfo();
+    /* @var $rule UrlRule */
+    foreach ($this->rules as $rule) {
+        if (($result = $rule->parseRequest($this, $request)) !== false) {
+            return $result;
+        }
+    }
 
+    if ($this->enableStrictParsing) {
+        return false;
+    }
+
+    Yii::trace('No matching URL rules. Using default URL parsing logic.', __METHOD__);
+
+    $suffix = (string) $this->suffix;
+    if ($suffix !== '' && $pathInfo !== '') {
+        $n = strlen($this->suffix);
+        if (substr_compare($pathInfo, $this->suffix, -$n, $n) === 0) {
+            $pathInfo = substr($pathInfo, 0, -$n);
+            if ($pathInfo === '') {
+                // suffix alone is not allowed
+                return false;
+            }
+        } else {
+            // suffix doesn't match
+            return false;
+        }
+    }
+
+    return [$pathInfo, []];
+} else {
+    Yii::trace('Pretty URL not enabled. Using default URL parsing logic.', __METHOD__);
+    $route = $request->getQueryParam($this->routeParam, '');
+    if (is_array($route)) {
+        $route = '';
+    }
+    return [(string) $route, []];
+}
+```
   
