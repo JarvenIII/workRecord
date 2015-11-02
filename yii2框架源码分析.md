@@ -14,7 +14,7 @@ $this->setInstance($this);
 $this->state = self::STATE_BEGIN;
 $this->preInit($config); //加载配置文件，加载默认组件
 $this->registerErrorHandler($config); //加载异常处理
-Component::__construct($config); //将配置文件的信息赋值给Object，
+Component::__construct($config); //将配置文件的信息赋值给Object
 ```
 Yii::$app代表应用实例，是一个全局可访问的单例，同时也是一个服务定位器，能提供request，response, db等特定功能的组件，这里将yii\base\Application以及它的父类\yii\base\Module \yii\di\ServiceLocator \yii\base\Component \yii\base\Object的所有public方法交给了Yii::$app。
 ```
@@ -36,7 +36,7 @@ if ($this->controllerNamespace === null) {
     }
 }
 ```
-这里我的理解是控制器class的位置找到控制器的命名空间。到这里一个应用主体加载完配置文件的配置信息，使用run()方法开始执行。
+这里我的理解是通过控制器class的位置找到控制器的命名空间。到这里为止，一个应用主体已经加载完配置文件的配置信息，使用run()方法开始执行。
 
 run() 位于yii\base\Application.php中，它使用handleRequest()获取用户请求并进行处理，主要是加载控制器。
 ```
@@ -55,7 +55,7 @@ if ($result !== false) {
     throw new NotFoundHttpException(Yii::t('yii', 'Page not found.'));
 }
 ```
-resolve()使用getUrlManager()->parseRequest($this)获取全部参数,将第一个参数作为路由，正则匹配所有参数并放入[$route, $params] (路由，参数数组)数组中。
+resolve()使用getUrlManager()->parseRequest($this)获取全部参数,将第一个参数作为路由，正则匹配所有参数并放入\[$route, $params\] (路由，参数数组)数组中。
 接下来handleRequest($request)调用runAction()来执行这个数组并检测返回值是不是Response对象，如果是就将结果返回给用户，否则就使用getResponse()获取response，将它的data作为结果返回给用户。
 runAction()方法位于yii\base\Application的父类yii\base\Module中，它需要接受2个参数，第一个是路由，第二个是有关此route的参数数组。
 ```
@@ -76,7 +76,7 @@ if (is_array($parts)) {
 在创建控制器之后调用了yii\base\Controller的runAction()方法来加载action，它同样接受两个参数：actionID和参数数组。关键性代码有两句：
 ```
 $action = $this->createAction($id); //创建action
-$result = $action->runWithParams($params); //执行控制器里的actio
+$result = $action->runWithParams($params); //执行控制器里的action
 ```
 runWithParams($params)位于yii\base\InlineAction。
 ```
@@ -135,7 +135,7 @@ if ($this->cache instanceof Cache) {
     $this->rules = $this->buildRules($this->rules);
 }
 ```
-首先是父类的实例化，很遗憾，我没有在Component和Object类里找到init()方法(只有一个抽象的)。$enablePrettyUrl表明是否使用Url美化，如果不开启使用原有格式，那么路由规则是无效的。初始化前， $this->cache 是缓存组件的ID，是个字符串，需要获取其实例。如果获取不到实例，说明应用不提供缓存功能，那么就将它设为false。如果引用到了缓存，那么就将路由规则缓存起来。以当前的类名作为缓存的key，将路由规则转换为hash值(令其不能被修改)。$data[0]用于储存路由规则，$data[1]存储hash值。如果已经有缓存，就使用$data中的值；如果还没有缓存，那么就使用buildRules()创建路由规则并缓存。如果不使用缓存，那么就直接使用buildRules()创建。
+首先是父类的实例化，很遗憾，我没有在Component和Object类里找到init()方法(只有一个抽象的)。$enablePrettyUrl表明是否使用Url美化，如果不开启而使用原有格式，那么路由规则是无效的。初始化前， $this->cache 是缓存组件的ID，是个字符串，需要获取其实例。如果获取不到实例，说明应用不提供缓存功能，那么就将它设为false。如果引用到了缓存，那么就将路由规则缓存起来。以当前的类名作为缓存的key，将路由规则转换为hash值(令其不能被修改)。$data[0]用于储存路由规则，$data[1]存储hash值。如果已经有缓存，就使用$data中的值；如果还没有缓存，那么就使用buildRules()创建路由规则并缓存。如果不使用缓存，那么就直接使用buildRules()创建。
 urlManager类里的许多方法都使用到buildRules()方法
 ```
 $compiledRules = [];
