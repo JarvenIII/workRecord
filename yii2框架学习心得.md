@@ -89,3 +89,62 @@ public function actions()
   ],
 ]
 ```
+
+#### 模型(Model)
+
+属性(attributes):yii\base\Model::attributes() 指定模型所拥有的属性。在表里你所有需要使用的字段，都要声明在attributes()里。感谢yii\base\Model支持 ArrayAccess 数组访问 和 ArrayIterator 数组迭代器，共有3种方法访问属性:
+```
+$model->name = 'example'; //1
+$model['name'] = 'example'; //2
+//迭代器遍历模型
+foreach ($model as $name => $value) {
+    echo "$name: $value\n";
+}
+```
+
+场景(scenarios): 模型可在多个场景下使用。在不同的场景下，模型可能会使用不同的业务规则和逻辑，例如 email 属性在注册时强制要求有，但在登陆时不需要。
+```
+public function scenarios()
+{
+    return [
+        'login' => ['username', 'password'],
+        'register' => ['username', 'email', 'password'],
+    ];
+}
+```
+scenarios() 方法默认实现会返回所有yii\base\Model::rules()方法申明的验证规则中的场景，主要在验证 和 属性块赋值 中使用。
+
+验证规则(rules): 模型接收的用户数据应满足的规则，如数据类型、是否为空等。可调用 yii\base\Model::validate() 来验证接收到的数据， 该方法使用yii\base\Model::rules()申明的验证规则来验证每个相关属性。
+可以使用”on“指定规则使用的场景：
+```
+public function rules()
+{
+  return [
+      // 在"register" 场景下 username, email 和 password 必须有值
+      [['username', 'email', 'password'], 'required', 'on' => 'register'],
+
+      // 在 "login" 场景下 username 和 password 必须有值
+      [['username', 'password'], 'required', 'on' => 'login'],
+  ];
+} 
+```
+由于默认yii\base\Model::scenarios()的实现会返回yii\base\Model::rules()所有属性和数据， 如果不覆盖这个方法，表示所有只要出现在活动验证规则中的属性都是安全的。
+
+安全属性(safeAttributes)：不会因用户修改造成安全隐患的属性。例如：一个用户可能具有3个属性\[username, password, role\], 你不会希望用户通过非法发送请求就能够更改role属性，所以username和password是安全属性，但是role不是。
+
+更灵活和强大的将模型转换为数组的方式是使用 yii\base\Model::toArray() 方法
+
+#### 视图(view)
+
+在视图中，可访问 $this 指向 yii\web\View 来管理和渲染这个视图文件。在controller使用render方法传入到view中的参数可以用<?= $name?>来使用。
+
+组织视图：
+- 控制器渲染的视图文件默认放在 @app/views/ControllerID 目录下， 其中 ControllerID 对应 控制器 ID, 例如控制器类为 PostController，视图文件目录应为 @app/views/post， 控制器类 PostCommentController对应的目录为 @app/views/post-comment， 如果是模块中的控制器，目录应为 yii\base\Module::basePath 模块目录下的 views/ControllerID 目录。
+
+视图中渲染：
+- 视图中的如下代码会渲染该视图所在目录下的 _overview.php 视图文件， 记住视图中 $this 对应 yii\base\View 组件:
+```
+<?= $this->render('_overview') ?> //在视图中渲染
+echo \Yii::$app->view->renderFile('@app/views/site/license.php'); //在任何地方渲染
+```
+
