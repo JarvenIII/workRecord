@@ -148,3 +148,63 @@ public function rules()
 echo \Yii::$app->view->renderFile('@app/views/site/license.php'); //在任何地方渲染
 ```
 
+视图名：
+- 视图名以双斜杠 // 开头，对应的视图文件路径为 @app/views/ViewName，在 yii\base\Application::viewPath 路径下找，例如 //site/about 对应到 @app/views/site/about.php。
+- 视图名以单斜杠/开始，视图文件路径以当前使用模块 的yii\base\Module::viewPath开始， 如果不存在模块，使用@app/views/ViewName开始，例如，如果当前模块为user， /user/create 对应成 @app/modules/user/views/user/create.php, 如果不在模块中，/user/create对应@app/views/user/create.php。
+- 在视图中渲染时，_overview.php应该和渲染它的视图文件位于同一个文件夹内
+
+布局(layout)：
+- 特殊视图，代表多个视图的公共部分；像普通视图一样创建，默认存入views/layouts中。 模块中使用的布局应存储在yii\base\Module::basePath模块目录下的views/layouts路径下。
+```
+<?php
+use yii\helpers\Html;
+/* @var $this yii\web\View */
+/* @var $content string 字符串 */
+?>
+<?php $this->beginPage() ?>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8"/>
+    <?= Html::csrfMetaTags() ?>
+    <title><?= Html::encode($this->title) ?></title>
+    <?php $this->head() ?>
+</head>
+<body>
+<?php $this->beginBody() ?>
+    <header>My Company</header>
+    <?= $content ?>
+    <footer>&copy; 2014 by My Company</footer>
+<?php $this->endBody() ?>
+</body>
+</html>
+<?php $this->endPage() ?>
+```
+ 输入代码 public $layout = 'post' 来使用布局。
+ 
+在view中设置页面标题：
+- 在试图中声明： 
+```
+<?php
+$this->title = 'My page title';
+?>
+```
+在<head>标签中要保证：
+```
+<title><?= Html::encode($this->title) ?></title>
+```
+注册Meta元标签和链接标签：
+```
+<?php
+$this->registerMetaTag(['name' => 'keywords', 'content' => 'yii, framework, php']);
+$this->registerLinkTag([
+    'title' => 'Live News for Yii',
+    'rel' => 'alternate',
+    'type' => 'application/rss+xml',
+    'href' => 'http://www.yiiframework.com/rss.xml/',
+]);
+?>
+```
+#### 模块(module)
+模块被组织成一个称为yii\base\Module::basePath的目录，此目录下都有一个继承yii\base\Module的模块类并能自动加载。
+要在应用中使用模块，只需要将模块加入到应用主体配置的yii\base\Application::modules属性的列表中。
