@@ -3,7 +3,7 @@
 
 ## ECMAScript 6简介
 ECMAScript 6（以下简称ES6）是JavaScript语言的下一代标准，它的目标，是使得JavaScript语言可以用来编写复杂的大
-型应用程序，成为企业级开发语言
+型应用程序，成为企业级开发语言。
 ## let和const命令
 ### 1. let命令
 let类似于var，用来声明变量，但是只在命令所在的代码块有效。解决了JavaScript没有块级作用域的缺陷。
@@ -203,3 +203,79 @@ let { prop: x } = undefined; // TypeError
 let { prop: y } = null; // TypeError
 ```
 ### 5. 函数参数的解构赋值
+函数的参数也可以使用解构赋值。
+```
+[[1, 2], [3, 4]].map(([a, b]) => a + b) // [ 3, 7 ]
+```
+
+注意写法不同会得到不同的结果：
+```
+function move({x = 0, y = 0} = {}) {
+  return [x, y];
+} //参数是一个对象，对变量x,y解构赋值
+
+function move({x, y} = { x: 0, y: 0 }) {
+  return [x, y];
+} //对参数指定默认值
+
+move({x: 3, y: 8}); // [3, 8] [3, 8]
+move({x: 3}); // [3, 0] [3, undefined]
+move({}); // [0, 0] [undefined, undefined]
+move(); // [0, 0] [0, 0]
+```
+### 6. 圆括号问题
+建议只要有可能，就不要在模式中放置圆括号。
+（1）变量声明语句、函数参数中，模式不能带有圆括号。
+（2）不能将整个模式，或嵌套模式中的一层，放在圆括号之中。
+```
+// 全部报错
+var { o: ({ p: p }) } = { o: { p: 2 } };
+function f([(z)]) { return z; }
+({ p: a }) = { p: 42 };
+[({ p: a }), { x: c }] = [{}, {}];
+```
+### 7. 用途
+（1）交换变量的值 [x, y] = [y, x];
+（2）从函数返回多个值
+```
+// 返回一个数组
+function example() {
+  return [1, 2, 3];
+}
+var [a, b, c] = example();
+
+// 返回一个对象
+function example() {
+  return {
+    foo: 1,
+    bar: 2
+  };
+}
+var { foo, bar } = example();
+```
+（3）提取JSON数据
+```
+var jsonData = {
+  id: 42,
+  status: "OK",
+  data: [867, 5309]
+}
+let { id, status, data: number } = jsonData;
+console.log(id, status, number)
+// 42, OK, [867, 5309]
+```
+（4）遍历Map结构
+```
+var map = new Map();
+map.set('first', 'hello');
+map.set('second', 'world');
+
+for (let [key, value] of map) {
+  console.log(key + " is " + value);
+}
+for (let [key] of map) {
+for (let [,value] of map) {
+```
+## class
+### 1. 基本语法
+ES6的类，完全可以看作构造函数的另一种写法。
