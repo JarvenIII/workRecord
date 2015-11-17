@@ -205,6 +205,14 @@ $this->registerLinkTag([
 ]);
 ?>
 ```
+
 #### 模块(module)
+
 模块被组织成一个称为yii\base\Module::basePath的目录，此目录下都有一个继承yii\base\Module的模块类并能自动加载。
 要在应用中使用模块，只需要将模块加入到应用主体配置的yii\base\Application::modules属性的列表中。
+
+#### 过滤器(filter)
+
+过滤器可包含 预过滤（过滤逻辑在动作之前） 或 后过滤（过滤逻辑在动作之后），也可同时包含两者。
+
+使用过滤器：
