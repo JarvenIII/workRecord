@@ -216,3 +216,49 @@ $this->registerLinkTag([
 过滤器可包含 预过滤（过滤逻辑在动作之前） 或 后过滤（过滤逻辑在动作之后），也可同时包含两者。
 
 使用过滤器：
+本质上是一种特殊的行为(behaviors)，可以在controller中覆盖behaviors()来申明过滤器，默认应用到所有actions。
+```
+public function behaviors()
+{
+    return [
+        [
+            'class' => 'yii\filters\HttpCache',
+            'only' => ['index', 'view'],
+            'lastModified' => function ($action, $params) {
+                $q = new \yii\db\Query();
+                return $q->from('user')->max('updated_at');
+            },
+        ],
+    ];
+} //使用except声明不应用到哪些actions
+```
+
+可在 模块或应用主体 中申明过滤器，但是应该用路由代替actionID。
+
+预过滤从底层到顶层，后过滤反之。
+
+核心过滤器：
+yii\filters\AccessControl 访问控制 => 授权
+```
+use yii\filters\AccessControl;
+
+public function behaviors()
+{
+    return [
+        'access' => [
+            'class' => AccessControl::className(),
+            'only' => ['create', 'update'],
+            'rules' => [
+                // 允许认证用户
+                [
+                    'allow' => true,
+                    'roles' => ['@'],
+                ],
+                // 默认禁止其他用户
+            ],
+        ],
+    ];
+}
+```
+使用以上代码可以在controller中使用ACF，@代表认证用户，？代表访问用户，无论是否认证。
+可以加入denyCallback属性来制定无授权用户访问操作的PHP回调函数。
