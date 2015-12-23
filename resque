@@ -1,1 +1,28 @@
+Resque-scheduler
+
+Resque是基于redis的后台任务库,它可以创建后台的job,将任务存储进队列里并执行他们.
+
+后台任务可以是任何的类和模块,只要它有一个叫做perform()的方法. 所以现存的方法可以很容易的转换成后台任务,也可以专门创建新类来执行任务.
+
+resque深受DelayedJob的启发,也可以说DelayedJob是resque的基石,它包含3部分:
+- 一个创建,查询和执行jobs的ruby库;
+- 一个开始启动一个消费job的worker的Rake任务;
+- 一个Sinatra app来监控jobs,workers和queues.
+
+Resque workers可以分布式部署,有优先级;
+Resque的队列是持续的,在固定的时间内将jobs push或pop,同时可以将jobs存储为json文件.
+Resque的前端就是告诉你哪些workers在工作,哪些没有,使用了哪些队列,那些队列里都有什么,提供一般的使用数据,帮你跟踪错误.
+
+Rake 是用 Ruby 编写的，并使用 Ruby 作为它的语法，因此学习曲线很短。Rake 使用 Ruby 的元编程功能来扩展语言，使之更利落地适应自动化任务。Rake 附带的 rdoc 中列出了一些优点（请注意，前两个是诸如 make 的其他任务自动化工具所共有的）：
+
+- 用户可以用先决条件指定任务。
+- Rake 支持规则模式来合并隐式任务。
+- Rake 是轻量级的。它可以用其他项目发布为单个文件。依靠 Rake 的项目不需要在目标系统上安装 Rake。
+
+Repository 仓库
+archive 存档
+@queue实例变量决定了队列Archive的jobs该放在哪里
+
+php-resque
+这是一个专门为resque worker和入队系统做的面向php的端口.
 
