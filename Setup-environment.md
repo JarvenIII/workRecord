@@ -26,9 +26,8 @@ deb-src http://mirrors.aliyun.com/ubuntu trusty-updates multiverse
 
 deb http://mirrors.aliyun.com/ubuntu trusty-backports main restricted universe multiverse
 deb-src http://mirrors.aliyun.com/ubuntu trusty-backports main restricted universe multiverse
+sudo apt-get update
 ```
-
-    - `sudo apt-get update`
 
 - Make sure home directory exists, if not create user home and make default.
     - `ls /home/`
