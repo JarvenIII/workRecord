@@ -86,8 +86,10 @@ phpbrew update
 
 - Install php5.6
 ```
-phpbrew install 5.6.13 +default+fpm+gd
+phpbrew install 5.6.13 +default+fpm
 phpbrew switch 5.6.13
+phpbrew use 5.6.13
+phpbrew ext install gd
 phpbrew ext install mongo
 phpbrew ext install redis
 phpbrew fpm start
