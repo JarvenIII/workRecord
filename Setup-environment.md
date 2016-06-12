@@ -99,6 +99,14 @@ phpbrew fpm start
 
 [Setup Guide](https://github.com/sindresorhus/editorconfig-sublime#readme)
 
+```
+cd ~/.config/sublime-text-3/Packages/
+git clone https://github.com/inetfuture/sublime-Config User
+cd ~/.config/sublime-text-3/Install\ Packages
+wget https://sublime/wbond.net/Package%20Control.sublime-package
+```
+- 最后还要自己安装git, gitBuffer两个插件。
+
 ## Setup nginx
 
 - 1. Install nginx
@@ -238,7 +246,7 @@ server {
 ### Setup with pecl
 
 - 1. Install Mongo
-Follow the [setup guide](http://docs.mongodb.org/manual/tutorial/install-mongodb-on-ubuntu/), and select the 2.6 version to install.
+   - Follow the [setup guide](http://docs.mongodb.org/manual/tutorial/install-mongodb-on-ubuntu/), and select the 2.6 version to install.
 
 - 2. 把1中的步骤写下来(这里的mongo是3.2版本)
 ```
@@ -263,14 +271,15 @@ sudo apt-get install redis-server
 ```sh
 sudo apt-get install ruby
 2. Use mirror for ruby
-```sh
+```
 gem sources --remove http://rubygems.org/
 gem sources -a https://ruby.taobao.org/
 gem sources -l
 *** CURRENT SOURCES ***
 https://ruby.taobao.org
-```
+
 Ensure only ruby.taobao.org exists
+```
 
 3. Install SASS
 ```sh
