@@ -267,12 +267,12 @@ sudo apt-get install redis-server
 
 ## Setup SCSS
 
-1. Install ruby (version > 1.9.1)
+- 1. Install ruby (version > 1.9.1)
 ```sh
 sudo apt-get install ruby
 ```
 
-2. Use mirror for ruby
+- 2. Use mirror for ruby
 
 ```
 gem sources --remove http://rubygems.org/
@@ -284,14 +284,14 @@ https://ruby.taobao.org
 Ensure only ruby.taobao.org exists
 ```
 
-3. Install SASS
+- 3. Install SASS
 ```sh
 sudo gem install sass
 ```
 
 ## Setup grunt and bower
 
-1. Install nodejs
+- 1. Install nodejs
 ```sh
 curl https://raw.githubusercontent.com/creationix/nvm/v0.25.1/install.sh | bash
 . ~/.profile
@@ -299,7 +299,7 @@ nvm install v0.12.2
 nvm use 0.12.2
 ```
 
-2. Install grunt
+- 2. Install grunt
 ```sh
 sudo apt-get install npm
 sudo npm install -g grunt-cli
@@ -326,12 +326,12 @@ grunt
 
 # 5. 安装supervisor
 
-1. Install supervisor
+- 1. Install supervisor
 ```sh
 sudo apt-get install supervisor
 ```
 
-2. Config supervisor
+- 2. Config supervisor
 ```sh
 sudo vi /etc/supervisor/conf.d/supervisor.conf
 ```
