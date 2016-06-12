@@ -270,7 +270,10 @@ sudo apt-get install redis-server
 1. Install ruby (version > 1.9.1)
 ```sh
 sudo apt-get install ruby
+```
+
 2. Use mirror for ruby
+
 ```
 gem sources --remove http://rubygems.org/
 gem sources -a https://ruby.taobao.org/
