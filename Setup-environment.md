@@ -43,7 +43,7 @@ sudo apt-get update
 - Verify
     - `vim --version`
 - Configuration
-    - `export EDITOR=/usr/bin/vim`
+    - `export EDITOR=/usr/bin/vim`(打开./bashrc或者./zshrc,将这一行加到最后)
     - `alias vi=/usr/bin/vim`
     
 # Git
