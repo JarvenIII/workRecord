@@ -1,5 +1,3 @@
-【好先生】1--42集 观看地址：http://www.miovdvjopb.cc/dsj/dalu/haoxiansheng/index.html?lpaw=660328&view=share#category/%258A&Refer=ts3w6bbvbnbvnnaa
-
 thunder://QUFodHRwOi8vM2RkeXNjLmNvbS9qamdrLzQzNC8zMjIyOC9aWg
 # 1.下载相关工具，创建sudo账号，换源
 
