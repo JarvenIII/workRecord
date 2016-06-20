@@ -45,4 +45,38 @@ var FilterableProductTable = React.createClass({
 ```
 
 - 为了创建一个渲染数据模型的应用，你将会构造一些组件，这些组件重用其它组件，并且通过 props 传递数据。 props 是一种从父级向子级传递数据的方式。 state用于实现交互功能，也就是说，数据随着时间变化。
-- 
+
+# 第三步：识别出最小的（但是完整的）代表 UI 的 state
+
+- 1. 是否是从父级通过 props 传入的
+- 2. 是否会随着时间改变
+- 3. 能根据组件中其它 state 数据或者 props 计算出来吗
+- 以上问题的答案如果是“是”，那么就不是state
+- 定义state
+```
+var FilterableProductTable = React.createClass({
+  getInitialState: function() {
+    return {
+      filterText: '',
+      inStockOnly: false
+    };
+  },
+
+  render: function() {
+    return (
+      <div>
+        <SearchBar
+          filterText={this.state.filterText}
+          inStockOnly={this.state.inStockOnly}
+        />
+        <ProductTable
+          products={this.props.products}
+          filterText={this.state.filterText}
+          inStockOnly={this.state.inStockOnly}
+        />
+      </div>
+    );
+  }
+});
+```
+
