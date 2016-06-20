@@ -326,6 +326,10 @@ npm install
 sudo apt-get install node
 grunt
 ```
+- 如果遇到问题，再次尝试运行
+```
+。/buildModules
+```
 
 # 5. 安装supervisor
 
