@@ -80,3 +80,79 @@ var FilterableProductTable = React.createClass({
 });
 ```
 
+# 例子
+- modules/Account/AccountSettingMain.jsx
+```
+import React, { Component, PropTypes } from 'react';
+import { connect } from 'react-redux';
+import { bindActionCreators } from 'redux';
+import { pushState } from 'redux-router';
+
+import { setState } from './actions/accountSetting.js';
+
+class AccountSettingMain extends Component {
+  static propTypes = {
+    children: PropTypes.object,
+    setState: PropTypes.func.isRequired,
+    pushState: PropTypes.func.isRequired,
+    i18n: PropTypes.func.isRequired
+  }
+
+  constructor(props) {
+    super(props);
+  }
+  
+  // 初始化的时候调用
+  componentDidMount = async () => {
+  }
+  
+  render = () => {
+    const { i18n } = this.props;
+    return ();
+  }
+}
+
+const MapStateToProps = (state) => {
+  return {
+    ...state.AccountSetting,
+    i18n: state.i18n.get('app')
+  };
+}
+
+const mapDispatchToProps = (dispatch) => {
+  return {
+    setState: bindActionCreators(setState, dispatch),
+    pushState: bindActionCreators(pushState, dispatch)
+  };
+}
+
+export default connect(mapStateToProps, mapDispatchToProps)(AccountSettingMain);
+```
+
+- actions/accountSetting.js
+```
+import { ACCOUNT_SETTING_SET } from './ActionTypes.js';
+
+export const setState = (state) => {
+  return { type: ACCOUNT_SETTING_SET, payload: state };
+}
+
+```
+
+- reducers/accountSetting.js
+```
+import { ACCOUNT_SETTING_SET } from './ActionTypes.js';
+
+static defaultState = {
+
+};
+
+export default (state = defaultState, action) => {
+  switch (action.type) {
+    case ACCOUNT_SETTING_SET:
+      return {...state, ...action.payload};
+    default:
+      return state;
+  }
+}
+```
