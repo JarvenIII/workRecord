@@ -156,3 +156,418 @@ export default (state = defaultState, action) => {
   }
 }
 ```
+
+- action/import.js
+```
+import * as RestUtil from '../../../utils/RestUtil';
+import {
+  API_GUESTS,
+  API_IMPORT_GUESTS,
+  API_EXPORT_GUESTS,
+  API_CANCEL_IMPORT_GUESTS,
+  API_IGNORE_IMPORT_PROGRESS,
+  API_IMPORT_PROGRESS,
+  API_EXPORT_PROGRESS,
+  API_CANCEL_EXPORT,
+  API_IGNORE_EXPORT_GUESET
+} from '../../../constants/API';
+import { API_FETCH_CHAINS_RESTAURANTS } from '../constants/API';
+import { GUEST_GENDER, GUEST_TYPE } from '../../../constants/Guest';
+import { IMPORTING_STATUS } from '../constants/Enum';
+import { LIST, IMPORT, EXPORT } from '../constants/Action';
+import _ from 'lodash';
+
+// 暴露出一个公共的获取客户列表的方法
+const fetchGuests = async (fetchCondition = {}, dispatch) => {
+  const { searchTerm: searchWord, searchTermKey: searchBy, tagIds, sortBy,
+    sortDirection, page, perPage, restaurantId, searchGuestType: typeId,
+    searchGuestGender: gender } = fetchCondition;
+  const params = { searchWord, searchBy, tagIds, sortBy, sortDirection,
+      page, perPage, restaurantId, typeId, gender };
+  let fetchResult = await RestUtil.get(API_GUESTS, { params });
+
+  const defaultResult = {
+    items: [],
+    _links: {},
+    _meta: {
+      totalCount: fetchResult.items.length,
+      pageCount: 1,
+      currentPage: 1,
+      perPage: 20
+    }
+  };
+
+  fetchResult = Object.assign(defaultResult, fetchResult);
+
+  // Assign default values for missing fields.
+  // TODO; May be removed after integration.
+  for (let i = 0; i < fetchResult.items.length; i++) {
+    const defaultInfo = {
+      _id: '1',
+      firstName: 'b',
+      lastName: '',
+      phone: '不知道',
+      gender: GUEST_GENDER.MALE,
+      birthday: new Date(),
+      email: 'example@example.com',
+      type: GUEST_TYPE.VIP,
+      systemTagIds: [],
+      customTagIds: [],
+      reserveCount: 10,
+      lastSeatedAt: new Date(),
+      createdAt: new Date()
+    };
+
+    fetchResult.items[i] = Object.assign({}, defaultInfo, fetchResult.items[i]);
+  }
+
+  dispatch({ type: LIST.FINISH_FETCH, fetchResult });
+};
+
+const fetch = (fetchCondition = {}) => {
+  return async (dispatch) => {
+    fetchGuests(fetchCondition, dispatch);
+  };
+};
+
+const startFetch = () => {
+  return (dispatch) => {
+    dispatch({ type: LIST.START_FETCH });
+  };
+};
+
+const changeSearchTerm = (newSearchTerm) => {
+  return (dispatch) => {
+    dispatch({ type: LIST.CHANGE_SEARCH_TERM, newSearchTerm });
+  };
+};
+
+const selectTag = (tag) => {
+  return (dispatch) => {
+    dispatch({ type: LIST.SELECT_TAG, tag });
+  };
+};
+
+const changeSort = (newSort) => {
+  return (dispatch) => {
+    dispatch({ type: LIST.CHANGE_SORT, newSort });
+  };
+};
+
+const changePage = (newPage) => {
+  return (dispatch) => {
+    dispatch({ type: LIST.CHANGE_PAGE, newPage });
+  };
+};
+
+const openDelete = (guestId) => {
+  return (dispatch) => {
+    dispatch({ type: LIST.OPEN_DELETE, guestId });
+  };
+};
+
+const openGuestDetail = () => {
+  return async (dispatch) => {
+    dispatch({ type: LIST.OPEN_GUEST_DETAIL });
+  };
+};
+
+const closeGuestDetail = () => {
+  return async (dispatch) => {
+    dispatch({ type: LIST.CLOSE_GUEST_DETAIL });
+  };
+};
+
+const toggleImportGuests = () => {
+  return (dispatch) => {
+    dispatch({ type: IMPORT.TOGGLE_IMPORT_POPUP });
+  };
+};
+
+const toggleExportGuests = () => {
+  return (dispatch) => {
+    dispatch({ type: EXPORT.TOGGLE_EXPORT_POPUP });
+  };
+};
+
+const exportGuests = (condition) => {
+  const { searchTerm: searchWord, searchTermKey: searchBy, tagIds, sortBy,
+    sortDirection, restaurantId, searchGuestType: typeId,
+    searchGuestGender: gender } = condition;
+  const params = { searchWord, searchBy, tagIds, sortBy, sortDirection,
+      restaurantId, typeId, gender };
+
+  return async () => {
+    await RestUtil.post(API_EXPORT_GUESTS, params);
+  };
+};
+
+const importGuests = (fileUrl, shouldOverwrite) => {
+  return async (dispatch) => {
+    await RestUtil.post(API_IMPORT_GUESTS, { fileUrl, shouldOverwrite });
+    dispatch({ type: IMPORT.FETCH_IMPORT_PROGRESS, importingProgress: { status: IMPORTING_STATUS.PARSING } });
+  };
+};
+
+const cancelImport = () => {
+  return async (dispatch) => {
+    await RestUtil.post(API_CANCEL_IMPORT_GUESTS);
+    dispatch({
+      type: IMPORT.FETCH_IMPORT_PROGRESS,
+      importingProgress: { status: IMPORTING_STATUS.IMPORT_CANCEL, total: 0, succeeded: 0 }
+    });
+  };
+};
+
+const ignoreImportProgress = () => {
+  return async (dispatch) => {
+    await RestUtil.post(API_IGNORE_IMPORT_PROGRESS);
+    dispatch({
+      type: IMPORT.FETCH_IMPORT_PROGRESS,
+      importingProgress: { status: IMPORTING_STATUS.IMPORT_CANCEL, total: 0, succeeded: 0 }
+    });
+  };
+};
+
+const fetchImportProgress = () => {
+  return async (dispatch) => {
+    let importingProgress = {
+      _id: 1,
+      status: 0,
+      total: 0,
+      succeeded: 0,
+      failed: 0,
+      failedRecordsUrl: ''
+    };
+
+    try {
+      const importingProgressTemp = await RestUtil.get(API_IMPORT_PROGRESS);
+      if (importingProgressTemp) {
+        importingProgress = importingProgressTemp;
+      }
+    } catch (error) {
+      console.log('Get import progress failed!');
+    }
+
+    dispatch({ type: IMPORT.FETCH_IMPORT_PROGRESS, importingProgress });
+  };
+};
+
+const fetchExportProgress = () => {
+  return async (dispatch) => {
+    const exportingPrograss = await RestUtil.get(API_EXPORT_PROGRESS);
+    dispatch({
+      type: EXPORT.FETCH_EXPORT_PROGRESS,
+      exportingPrograss: exportingPrograss || { status: IMPORTING_STATUS.PARSING, total: 0, succeeded: 0 }
+    });
+  };
+};
+
+const cancelExport = () => {
+  return async (dispatch) => {
+    await RestUtil.post(API_CANCEL_EXPORT);
+    dispatch({
+      type: EXPORT.FETCH_EXPORT_PROGRESS,
+      exportingPrograss: { status: IMPORTING_STATUS.IMPORT_CANCEL, total: 0, succeeded: 0 }
+    });
+  };
+};
+
+const ignoreExport = () => {
+  return async (dispatch) => {
+    await RestUtil.post(API_IGNORE_EXPORT_GUESET);
+    dispatch({
+      type: EXPORT.FETCH_EXPORT_PROGRESS,
+      exportingPrograss: { status: IMPORTING_STATUS.IMPORT_CANCEL, total: 0, succeeded: 0 }
+    });
+  };
+};
+
+const clearFetchCondition = () => {
+  return { type: LIST.CLEAR_FETCH_CONDITION };
+};
+
+const setFetchCondition = (fetchCondition = {}) => {
+  return { type: LIST.SET_FETCH_CONDITION, fetchCondition };
+};
+
+const fetchChainsRestaurants = (restaurant) => {
+  return async (dispatch) => {
+    let restaurantId = restaurant._id;
+    let checkedRestaurant;
+    const restaurants = (await RestUtil.get(API_FETCH_CHAINS_RESTAURANTS) || {}).items || [];
+    let isUncheckedRestaurant = true;
+    for (const restaurantItem of restaurants) {
+      if (restaurantId === restaurantItem._id) {
+        checkedRestaurant = { ...restaurantItem };
+        isUncheckedRestaurant = false;
+      }
+    }
+    if (isUncheckedRestaurant && !_.isEmpty(restaurants)) {
+      checkedRestaurant = { ...restaurants[0] };
+      restaurantId = restaurants[0]._id;
+    }
+
+    dispatch({ type: LIST.FETCH_CHAINS_RESTAURANTS, restaurants, restaurantId, checkedRestaurant });
+  };
+};
+
+const selectChainsRestaurant = (checkedRestaurant) => {
+  return { type: LIST.SELECT_CHAINS_RESTAURANT, checkedRestaurant };
+};
+
+const setState = (state) => {
+  return { type: LIST.GUESTS_SET_STATE, payload: state };
+};
+
+export {
+  startFetch,
+  fetch,
+  changeSearchTerm,
+  selectTag,
+  changeSort,
+  changePage,
+  openDelete,
+  openGuestDetail,
+  closeGuestDetail,
+  toggleImportGuests,
+  toggleExportGuests,
+  importGuests,
+  cancelImport,
+  ignoreImportProgress,
+  fetchImportProgress,
+  cancelExport,
+  ignoreExport,
+  fetchExportProgress,
+  exportGuests,
+  fetchGuests,
+  clearFetchCondition,
+  setFetchCondition,
+  fetchChainsRestaurants,
+  selectChainsRestaurant,
+  setState
+};
+
+```
+
+- reducer/import.js
+```
+import _ from 'lodash';
+
+import { LIST, DELETE, IMPORT, EXPORT } from '../constants/Action';
+import { IMPORTING_STATUS, GUEST_SEARCH_KEYS } from '../constants/Enum';
+
+const defaultCondition = { fetchCondition: { tagIds: [], page: 1, perPage: 20, searchTermKey: GUEST_SEARCH_KEYS[0] } };
+const defaultState = { ...defaultCondition, isExpandTagsPane: false };
+
+export default (state = defaultState, action) => {
+  let newState = {};
+  switch (action.type) {
+    case LIST.START_FETCH:
+      newState = { shouldFetch: true, lastFetchCondition: { ...state.fetchCondition } };
+      break;
+    case LIST.CLEAR_FETCH_CONDITION:
+      newState = _.cloneDeep(defaultCondition);
+      break;
+    case LIST.SET_FETCH_CONDITION:
+      newState = { fetchCondition: { ...state.fetchCondition, ...action.fetchCondition } };
+      break;
+    case LIST.FINISH_FETCH:
+      newState = { shouldFetch: false, fetchResult: action.fetchResult };
+      break;
+    case LIST.FETCH_CHAINS_RESTAURANTS:
+      newState = {
+        shouldFetch: true,
+        restaurants: action.restaurants,
+        checkedRestaurant: action.checkedRestaurant,
+        fetchCondition: { ...state.fetchCondition, restaurantId: action.restaurantId }
+      };
+      break;
+    case LIST.SELECT_CHAINS_RESTAURANT:
+      newState = {
+        checkedRestaurant: { ...action.checkedRestaurant },
+        fetchCondition: { ...state.fetchCondition, restaurantId: action.checkedRestaurant._id }
+      };
+      break;
+    case LIST.CHANGE_SEARCH_TERM:
+      newState = { fetchCondition: { ...state.fetchCondition, searchTerm: action.newSearchTerm } };
+      break;
+    case LIST.SELECT_TAG:
+      let tagIds = state.fetchCondition.tagIds;
+      if (tagIds.includes(action.tag._id)) {
+        tagIds = tagIds.filter(tagId => tagId !== action.tag._id);
+      } else {
+        tagIds = tagIds.concat([action.tag._id]);
+      }
+      newState = { fetchCondition: { ...state.fetchCondition, tagIds } };
+      break;
+    case LIST.CHANGE_SORT:
+      newState = { fetchCondition: { ...state.fetchCondition, ...action.newSort, page: 1 } };
+      break;
+    case LIST.CHANGE_PAGE:
+      newState = { fetchCondition: { ...state.fetchCondition, page: action.newPage } };
+      break;
+    case LIST.OPEN_GUEST_DETAIL:
+      newState = { guestDetail: { isOpen: true } };
+      break;
+    case LIST.CLOSE_GUEST_DETAIL:
+      newState = {
+        guestDetail: {
+          isOpen: false
+        }
+      };
+      break;
+    case LIST.OPEN_DELETE:
+      newState = {
+        showDeleteConfirm: true
+      };
+      break;
+    case DELETE.SUCCESS_DELETE:
+    case DELETE.FAIL_DELETE:
+      newState = {
+        showDeleteConfirm: false,
+        shouldFetch: true
+      };
+      break;
+    case DELETE.CANCEL_DELETE:
+      newState = {
+        showDeleteConfirm: false
+      };
+      break;
+    case IMPORT.TOGGLE_IMPORT_POPUP:
+      newState = { isShowImportGuests: !state.isShowImportGuests };
+      break;
+    case IMPORT.RECEIVE_GUESTS_IMPORTING_PROGRESS_FROM_TUISONGBAO:
+      newState = { importingProgress: action.guests };
+
+      if (state.importingProgress && state.importingProgress.status === IMPORTING_STATUS.IMPORT_CANCEL) {
+        newState = {};
+      }
+      break;
+    case IMPORT.FETCH_IMPORT_PROGRESS:
+      newState = { importingProgress: action.importingProgress };
+      break;
+    case EXPORT.FETCH_EXPORT_PROGRESS:
+      newState = { exportingPrograss: action.exportingPrograss };
+      break;
+    case EXPORT.TOGGLE_EXPORT_POPUP:
+      newState = { isShowExportGuests: !state.isShowExportGuests };
+      break;
+    case EXPORT.RECEIVE_GUESTS_EXPORTING_PROGRESS_FROM_TUISONGBAO:
+      newState = { exportingPrograss: action.guests };
+
+      if (state.exportingPrograss && state.exportingPrograss.status === IMPORTING_STATUS.IMPORT_CANCEL) {
+        newState = { exportingPrograss: {} };
+      }
+      break;
+    case LIST.GUESTS_SET_STATE:
+      newState = { ...action.payload };
+      break;
+    default:
+      break;
+  }
+
+  return { ...state, ...newState };
+};
+
+```
