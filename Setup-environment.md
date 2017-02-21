@@ -100,8 +100,15 @@ phpbrew fpm start
 
 ## Install sublime text plugin for editorconfig
 
+```
+sudo add-apt-repository ppa:webupd8team/sublime-text-3
+sudo apt-get update 
+sudo apt-get install sublime-text-installer
+```
+
 [Setup Guide](https://github.com/sindresorhus/editorconfig-sublime#readme)
 
+- 使用subl进入，按ctrl+shift+p,输入install package control.
 ```
 cd ~/.config/sublime-text-3/Packages/
 git clone https://github.com/inetfuture/sublime-Config User
