@@ -255,10 +255,10 @@ server {
 
 ### Setup with pecl
 
-- 1. Install Mongo
+1. Install Mongo
    - Follow the [setup guide](http://docs.mongodb.org/manual/tutorial/install-mongodb-on-ubuntu/), and select the 2.6 version to install.
 
-- 2. 把1中的步骤写下来(这里的mongo是3.2版本)
+2. 把1中的步骤写下来(这里的mongo是3.2版本)
 ```
 sudo apt-key adv --keyserver hkp://keyserver.ubuntu.com:80 --recv EA312927
 echo "deb http://repo.mongodb.org/apt/ubuntu trusty/mongodb-org/3.2 multiverse" | sudo tee /etc/apt/sources.list.d/mongodb-org-3.2.list
