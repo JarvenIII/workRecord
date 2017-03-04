@@ -2,7 +2,7 @@
 
 ## 基础
 - 双引号和单引号的区别
-- [$_REQUEST, $_GET, $_POST](http://www.jb51.net/article/28957.htm)
+- [$_REQUEST,$_GET, $_POST](http://www.jb51.net/article/28957.htm)
 - $GLOBALS 所有的变量都放在里面
 - $FILE 上传文件使用
 - $SERVER 系统环境变量
@@ -28,3 +28,20 @@
 - 多主机分流
 - 数据库读写分离
 - 控制大文件的上传下载
+
+## function
+- strrpos(string, value)
+  - 返回value在字符串中最后一次出现的位置(区分大小写)
+  - strripos(区分)
+  - strpos(第一次出现的位置)
+- substr(string, start, length)
+  - 返回字符串的一部分
+- rand(start, end)
+  - 随机返回start-end的数字
+- str_replace(find, replace, string, count)
+- file_size(): 获取文件大小
+- log(value, 1024): value是1024的几次方，value=1024 \* 1024,返回2
+- floor(4.8): 向下取整
+- pow(4, 3): 64,返回x的y次方
+- opendir(), readdir(), is_dir(), readfile()
+- 
