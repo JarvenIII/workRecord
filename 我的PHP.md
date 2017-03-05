@@ -44,4 +44,5 @@
 - floor(4.8): 向下取整
 - pow(4, 3): 64,返回x的y次方
 - opendir(), readdir(), is_dir(), readfile()
+- round(value, n) 对浮点数四舍五入
 - 
